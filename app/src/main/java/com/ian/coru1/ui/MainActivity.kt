@@ -1,4 +1,4 @@
-package com.ian.coru1
+package com.ian.coru1.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,9 +7,10 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.ian.coru1.R
 import com.ian.coru1.databinding.ActivityMainBinding
 import com.ian.coru1.retrofit.RetrofitManager
-import com.ian.coru1.utils.Constants
+import com.ian.coru1.utils.Constants.TAG
 import com.ian.coru1.utils.SEARCH_TYPE
 import com.ian.coru1.utils.onMyTextChanged
 
@@ -21,26 +22,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        Log.d(Constants.TAG, "MainActivity - onCreate: called")
 
         //라디오 그룹
         binding.searchTermRadioGroup.setOnCheckedChangeListener { _, checkedId ->
             when(checkedId){
                 R.id.photo_radio ->{
-                    Log.d(Constants.TAG, "사진검색 버튼 클릭")
                     binding.searchTermTextLayout.hint = "사진검색"
                     binding.searchTermTextLayout.startIconDrawable = resources.getDrawable(R.drawable.ic_photo_libary_black_24dp,resources.newTheme())
                     this.currentSearchType = SEARCH_TYPE.PHOTO
                 }
                 R.id.user_radio ->{
-                    Log.d(Constants.TAG, "사용자 검색 버튼 클릭")
                     binding.searchTermTextLayout.hint = "사용자검색"
                     binding.searchTermTextLayout.startIconDrawable = resources.getDrawable(R.drawable.ic_person_black_24dp,resources.newTheme())
                     this.currentSearchType = SEARCH_TYPE.USER
 
                 }
             }
-            Log.d(Constants.TAG, "MainActivity - checked change: $currentSearchType ");
         }
 
         //text가 변경이 되었을때
@@ -62,14 +59,13 @@ class MainActivity : AppCompatActivity() {
 
         binding.included.searchBtn.setOnClickListener {
             val edittext = binding.searchTermEditText.text.toString()
-            Log.d("T", "검색버튼 클릭 $currentSearchType")
             RetrofitManager.instance.searchPhotos(searchTerm = edittext, completion = {responseDataArrayList->
-                Log.d("response",responseDataArrayList.toString())
                 val intent = Intent(this, PhotoCollectionActivity::class.java)
                 val bundle = Bundle()
                 bundle.putSerializable("photo_array_list",responseDataArrayList)
                 intent.putExtra("array_bundle",bundle)
                 intent.putExtra("search_term",edittext)
+                Log.d(TAG, "MainActivity - onCreate: $responseDataArrayList");
                 startActivity(intent)
             })
             this.handleSearchButtonUi()

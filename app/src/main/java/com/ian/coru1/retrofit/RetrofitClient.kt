@@ -2,11 +2,9 @@ package com.ian.coru1.retrofit
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import com.ian.coru1.App
 import com.ian.coru1.utils.API
-import com.ian.coru1.utils.Constants.TAG
 import com.ian.coru1.utils.isJsonArray
 import com.ian.coru1.utils.isJsonObject
 import okhttp3.Interceptor
@@ -23,19 +21,15 @@ object RetrofitClient {
     private var retrofitClient: Retrofit? = null
 
     fun getClient(baseUrl: String): Retrofit? {
-        Log.d(TAG, "RetrofitClient - getClient: ");
 
         //로깅 인터센터 추가
         val client = OkHttpClient.Builder()
         val loggingInterceptor = HttpLoggingInterceptor(object :HttpLoggingInterceptor.Logger{
             override fun log(message: String) {
-                Log.d(TAG, "RetrofitClient - log: $message");
                 when{
                     message.isJsonObject() ->{
-                        Log.d(TAG, "json object ");
                     }
                     message.isJsonArray()->{
-                        Log.d(TAG, "jsonArray ");
                     }
                     else->{
                         //try-catch
@@ -50,7 +44,6 @@ object RetrofitClient {
         //기본 파라미터 추가
         val baseParameterInterceptor : Interceptor = (object: Interceptor{
             override fun intercept(chain: Interceptor.Chain): Response {
-                Log.d(TAG, "RetrofitClient - intercept: ");
                 val originalRequest =chain.request()
                 val addedUrl =
                     originalRequest.url.newBuilder().addQueryParameter("client_id", API.CLIENT_ID).build()

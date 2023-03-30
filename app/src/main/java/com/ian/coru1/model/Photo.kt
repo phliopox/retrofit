@@ -1,4 +1,4 @@
-package com.ian.coru1
+package com.ian.coru1.model
 
 import java.io.Serializable
 

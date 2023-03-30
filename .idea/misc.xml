@@ -6,6 +6,8 @@
         <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/drawable/background_heart_btn.xml" value="0.265" />
         <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/drawable/background_heart_count.xml" value="0.265" />
         <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/drawable/ic_baseline_favorite_24.xml" value="0.265" />
+        <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/drawable/ic_baseline_more_vert_24.xml" value="0.265" />
+        <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.265" />
         <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/drawable/ic_person_black_24dp.xml" value="0.239" />
         <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/drawable/ic_photo_libary_black_24dp.xml" value="0.239" />
         <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/drawable/ic_unsplah.xml" value="0.239" />
@@ -14,6 +16,7 @@
         <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/layout/layout_btn_search.xml" value="0.36614583333333334" />
         <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/layout/layout_but_search.xml" value="0.36614583333333334" />
         <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/layout/photo_activity.xml" value="0.36614583333333334" />
+        <entry key="..\:/Users/Jeong/AndroidStudioProjects/coru1/app/src/main/res/menu/top_app_bar.xml" value="0.36614583333333334" />
       </map>
     </option>
   </component>

@@ -3,7 +3,7 @@ package com.ian.coru1.retrofit
 import android.annotation.SuppressLint
 import android.util.Log
 import com.google.gson.JsonElement
-import com.ian.coru1.Photo
+import com.ian.coru1.model.Photo
 import com.ian.coru1.utils.API
 import com.ian.coru1.utils.Constants.TAG
 import retrofit2.Call
@@ -26,7 +26,6 @@ class RetrofitManager {
         call.enqueue(object : retrofit2.Callback<JsonElement> {
             @SuppressLint("SimpleDateFormat")
             override fun onResponse(call: Call<JsonElement>, response: Response<JsonElement>) {
-                Log.d(TAG, "응답성공 - onResponse: ${response.body().toString()}")
                 when (response.code()) {
                     200 -> {
                         response.body()?.let {
@@ -62,7 +61,6 @@ class RetrofitManager {
             }
 
             override fun onFailure(call: Call<JsonElement>, t: Throwable) {
-                Log.d(TAG, "응답실패 - onFailure: ");
             }
 
         })
