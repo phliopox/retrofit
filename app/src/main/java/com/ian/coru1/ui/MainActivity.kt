@@ -3,14 +3,12 @@ package com.ian.coru1.ui
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ian.coru1.R
 import com.ian.coru1.databinding.ActivityMainBinding
 import com.ian.coru1.retrofit.RetrofitManager
-import com.ian.coru1.utils.Constants.TAG
 import com.ian.coru1.utils.SEARCH_TYPE
 import com.ian.coru1.utils.onMyTextChanged
 
@@ -65,7 +63,6 @@ class MainActivity : AppCompatActivity() {
                 bundle.putSerializable("photo_array_list",responseDataArrayList)
                 intent.putExtra("array_bundle",bundle)
                 intent.putExtra("search_term",edittext)
-                Log.d(TAG, "MainActivity - onCreate: $responseDataArrayList");
                 startActivity(intent)
             })
             this.handleSearchButtonUi()
