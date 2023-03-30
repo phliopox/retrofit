@@ -1,6 +1,10 @@
 package com.ian.coru1.retrofit
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
+import com.ian.coru1.App
 import com.ian.coru1.utils.API
 import com.ian.coru1.utils.Constants.TAG
 import com.ian.coru1.utils.isJsonArray
@@ -55,7 +59,14 @@ object RetrofitClient {
                         .url(addedUrl)
                         .method(originalRequest.method,originalRequest.body)
                         .build()
-                return chain.proceed(finalRequest)
+                //return chain.proceed(finalRequest)
+                val response = chain.proceed(finalRequest)
+                if (response.code != 200) {
+                    Handler(Looper.getMainLooper()).post{
+                        Toast.makeText(App.instance,"${response.code} 입니다",Toast.LENGTH_SHORT).show()
+                    }
+                }
+                return response
             }
         })
 

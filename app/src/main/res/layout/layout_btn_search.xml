@@ -20,6 +20,5 @@
         android:layout_height="25dp"
         android:layout_gravity="center"
         android:visibility="invisible"
-        android:indeterminateTint="#fff"
         />
 </FrameLayout>

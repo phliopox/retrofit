@@ -1,5 +1,6 @@
 package com.ian.coru1
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -60,21 +61,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.included.searchBtn.setOnClickListener {
+            val edittext = binding.searchTermEditText.text.toString()
             Log.d("T", "검색버튼 클릭 $currentSearchType")
-            RetrofitManager.instance.searchPhotos(searchTerm = binding.searchTermEditText.text.toString(), completion = {
-                Log.d("response",it)
-
+            RetrofitManager.instance.searchPhotos(searchTerm = edittext, completion = {responseDataArrayList->
+                Log.d("response",responseDataArrayList.toString())
+                val intent = Intent(this, PhotoCollectionActivity::class.java)
+                val bundle = Bundle()
+                bundle.putSerializable("photo_array_list",responseDataArrayList)
+                intent.putExtra("array_bundle",bundle)
+                intent.putExtra("search_term",edittext)
+                startActivity(intent)
             })
             this.handleSearchButtonUi()
         }
     }
     private fun handleSearchButtonUi() {
         binding.included.btnProgress.visibility = View.VISIBLE
-        binding.included.searchBtn.text =""
+        binding.included.searchBtn.visibility =View.INVISIBLE
 
         Handler().postDelayed({
             binding.included.btnProgress.visibility = View.INVISIBLE
-            binding.included.searchBtn.text ="검색"
+            binding.included.searchBtn.visibility =View.VISIBLE
         }, 1500)
     }
 }
