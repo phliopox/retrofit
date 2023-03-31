@@ -17,6 +17,7 @@ import com.ian.coru1.R
 import com.ian.coru1.databinding.PhotoActivityBinding
 import com.ian.coru1.model.Photo
 import com.ian.coru1.model.SearchData
+import com.ian.coru1.retrofit.RetrofitManager
 import com.ian.coru1.utils.Constants.TAG
 import com.ian.coru1.utils.SharedPrefManager
 import com.ian.coru1.utils.toFormatString
@@ -25,13 +26,15 @@ import java.util.*
 class PhotoCollectionActivity : AppCompatActivity(),
     SearchView.OnQueryTextListener,
     CompoundButton.OnCheckedChangeListener,
-    View.OnClickListener {
+    View.OnClickListener,
+    SearchViewClickListener {
     private lateinit var binding: PhotoActivityBinding
     private var photoList = ArrayList<Photo>()
     private var searchHistoryList: ArrayList<SearchData> = ArrayList()
     private lateinit var mySearchView: SearchView
     private lateinit var mySearchViewEditText: EditText
     private lateinit var searchViewAdapter: SearchViewAdapter
+    private lateinit var photoGridAdapter : PhotoGridAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -43,9 +46,9 @@ class PhotoCollectionActivity : AppCompatActivity(),
         val searchTerm = intent.getStringExtra("search_term")
         photoList = bundle?.getSerializable("photo_array_list") as ArrayList<Photo>
 
-        val adapter = PhotoGridAdapter()
-        binding.myPhotoRv.adapter = adapter
-        adapter.submitList(photoList)
+        photoGridAdapter = PhotoGridAdapter()
+        binding.myPhotoRv.adapter = photoGridAdapter
+        photoGridAdapter.submitList(photoList)
 
         binding.topAppBar.title = searchTerm
 
@@ -61,9 +64,10 @@ class PhotoCollectionActivity : AppCompatActivity(),
         //서치뷰 adapter
         searchHistoryRVSetting(searchHistoryList)
 
+        handleSearchViewUI()
     }
     private fun searchHistoryRVSetting(searchHistoryList : ArrayList<SearchData>){
-        searchViewAdapter = SearchViewAdapter()
+        searchViewAdapter = SearchViewAdapter(this)
         binding.searchHistoryRv.apply {
             scrollToPosition(searchViewAdapter.itemCount - 1) //최신거 맨위
             adapter = searchViewAdapter
@@ -74,7 +78,6 @@ class PhotoCollectionActivity : AppCompatActivity(),
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        Log.d(TAG, "PhotoCollectionActivity - onCreateOptionsMenu: called")
         val inflater = menuInflater
         inflater.inflate(R.menu.top_app_bar_menu, menu)
 
@@ -85,8 +88,9 @@ class PhotoCollectionActivity : AppCompatActivity(),
             this.setOnQueryTextFocusChangeListener { _, hasExpanded ->
                 when (hasExpanded) {
                     true -> {
-                        Log.d(TAG, "PhotoCollectionActivity - onCreateOptionsMenu:서치뷰열림 ")
                         binding.searchHistoryView.visibility = View.VISIBLE
+                        handleSearchViewUI()
+
                     }
                     false -> {
                         binding.searchHistoryView.visibility = View.INVISIBLE
@@ -112,10 +116,14 @@ class PhotoCollectionActivity : AppCompatActivity(),
             binding.topAppBar.title = query
 
             //TODO api 호출 ,검색어저장
+            searchPhotoApiCall(query)
+
             val newSearchData = SearchData(term = query, timestamp = Date().toFormatString())
             this.searchHistoryList.add(newSearchData)
             SharedPrefManager.storeSearchHistoryList(this.searchHistoryList as MutableList<SearchData>)
             this.searchViewAdapter.notifyDataSetChanged()
+            binding.topAppBar.title = query
+            binding.searchHistoryView.visibility = View.INVISIBLE
         }
 
         //query 비우고, 타자기 내리기
@@ -146,8 +154,55 @@ class PhotoCollectionActivity : AppCompatActivity(),
     override fun onClick(view: View?) {
         when (view) {
             binding.clearSearchHistoryBtn -> {
-                Log.d("검색 기록", "삭제버튼 클릭")
+                SharedPrefManager.clearHistory()
+                searchHistoryList.clear()
+                handleSearchViewUI()
             }
         }
     }
+
+    override fun onSearchItemDeleteClicked(position: Int) {
+        Log.d(TAG, "PhotoCollectionActivity - onSearchItemDeleteClicked: delete $position");
+        this.searchHistoryList.removeAt(position)
+        //pref 데이터 덮어씌우기 , 저장하면 통째로 덮어씌워진다.
+        SharedPrefManager.storeSearchHistoryList(this.searchHistoryList)
+        this.searchViewAdapter.notifyDataSetChanged()
+        handleSearchViewUI()
+
+    }
+
+    override fun onSearchItemClicked(position: Int) {
+        Log.d(TAG, "PhotoCollectionActivity - onSearchItemClicked: row : ${searchHistoryList[position].term}")
+        onQueryTextSubmit(searchHistoryList[position].term)
+    }
+
+    //api 호출
+    private fun searchPhotoApiCall(query : String){
+        RetrofitManager.instance.searchPhotos(searchTerm = query, completion = {
+            if(it.isEmpty()){
+             Toast.makeText(this,"$query 에 대한 검색 결과가 없습니다.",Toast.LENGTH_SHORT).show()
+            }else {
+                photoList.clear()
+                photoList = it
+                photoGridAdapter.submitList(photoList)
+                photoGridAdapter.notifyDataSetChanged()
+            }
+        })
+    }
+    private fun handleSearchViewUI(){
+        if (searchHistoryList.size > 0) {
+            binding.searchHistoryRv.visibility = View.VISIBLE
+            binding.rvLabel.visibility =View.VISIBLE
+            binding.clearSearchHistoryBtn.visibility=View.VISIBLE
+        }else{
+            binding.searchHistoryRv.visibility = View.INVISIBLE
+            binding.rvLabel.visibility = View.INVISIBLE
+            binding.clearSearchHistoryBtn.visibility=View.INVISIBLE
+        }
+    }
+}
+interface SearchViewClickListener{
+    fun onSearchItemDeleteClicked(position : Int)
+
+    fun onSearchItemClicked(position : Int)
 }

@@ -1,38 +1,28 @@
 package com.ian.coru1.ui
 
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ian.coru1.databinding.ItemSearchHistoryBinding
 import com.ian.coru1.model.SearchData
-import com.ian.coru1.utils.Constants.TAG
 
-class SearchViewAdapter :
+class SearchViewAdapter(private val searchViewClickListener: SearchViewClickListener) :
     RecyclerView.Adapter<SearchViewAdapter.SearchViewHolder>(){
     private var searchDataList = ArrayList<SearchData>()
 
     inner class SearchViewHolder(private val binding: ItemSearchHistoryBinding) :
-        RecyclerView.ViewHolder(binding.root),
-        View.OnClickListener{
-        init {
-            binding.layoutRow.setOnClickListener(this)
-            binding.xBtn.setOnClickListener(this)
-        }
+        RecyclerView.ViewHolder(binding.root){
+
         fun bind(searchData: SearchData) {
             binding.searchData = searchData
-        }
+          val indexOf = searchDataList.indexOf(searchData)
 
-        override fun onClick(v: View?) {
-            when(v){
-                binding.xBtn ->{
-                    Log.d(TAG, "SearchViewHolder - onClick: xbtn");
-                }
-                binding.layoutRow ->{
-                    Log.d(TAG, "SearchViewHolder - onClick: row");
-                }
-            }
+          binding.xBtn.setOnClickListener{
+              searchViewClickListener.onSearchItemDeleteClicked(indexOf)
+          }
+          binding.layoutRow.setOnClickListener{
+              searchViewClickListener.onSearchItemClicked(indexOf)
+          }
         }
     }
 
