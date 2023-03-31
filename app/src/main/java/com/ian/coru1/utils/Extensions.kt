@@ -1,8 +1,11 @@
 package com.ian.coru1.utils
 
+import android.annotation.SuppressLint
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 fun String?.isJsonObject():Boolean{
@@ -27,4 +30,10 @@ fun EditText.onMyTextChanged(completion : (Editable?) -> Unit){
         }
 
     })
+}
+
+@SuppressLint("SimpleDateFormat")
+fun Date.toFormatString() : String {
+    val format = SimpleDateFormat("HH:mm:ss")
+    return format.format(this)
 }
