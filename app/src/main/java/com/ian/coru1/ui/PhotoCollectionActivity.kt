@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
-import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.CompoundButton
@@ -18,7 +17,6 @@ import com.ian.coru1.databinding.PhotoActivityBinding
 import com.ian.coru1.model.Photo
 import com.ian.coru1.model.SearchData
 import com.ian.coru1.retrofit.RetrofitManager
-import com.ian.coru1.utils.Constants.TAG
 import com.ian.coru1.utils.SharedPrefManager
 import com.ian.coru1.utils.toFormatString
 import java.util.*
@@ -117,11 +115,7 @@ class PhotoCollectionActivity : AppCompatActivity(),
 
             //TODO api 호출 ,검색어저장
             searchPhotoApiCall(query)
-
-            val newSearchData = SearchData(term = query, timestamp = Date().toFormatString())
-            this.searchHistoryList.add(newSearchData)
-            SharedPrefManager.storeSearchHistoryList(this.searchHistoryList as MutableList<SearchData>)
-            this.searchViewAdapter.notifyDataSetChanged()
+            insertSearchTermHistory(query)
             binding.topAppBar.title = query
             binding.searchHistoryView.visibility = View.INVISIBLE
         }
@@ -145,7 +139,9 @@ class PhotoCollectionActivity : AppCompatActivity(),
         when (switch) {
             binding.searchHistorySwitch -> {
                 if (isChecked) {
-                    Log.d("switch !", "검색어 저장 기능 on")
+                    SharedPrefManager.setSearchHistoryMode(true)
+                }else{
+                    SharedPrefManager.setSearchHistoryMode(false)
                 }
             }
         }
@@ -162,7 +158,6 @@ class PhotoCollectionActivity : AppCompatActivity(),
     }
 
     override fun onSearchItemDeleteClicked(position: Int) {
-        Log.d(TAG, "PhotoCollectionActivity - onSearchItemDeleteClicked: delete $position");
         this.searchHistoryList.removeAt(position)
         //pref 데이터 덮어씌우기 , 저장하면 통째로 덮어씌워진다.
         SharedPrefManager.storeSearchHistoryList(this.searchHistoryList)
@@ -172,7 +167,6 @@ class PhotoCollectionActivity : AppCompatActivity(),
     }
 
     override fun onSearchItemClicked(position: Int) {
-        Log.d(TAG, "PhotoCollectionActivity - onSearchItemClicked: row : ${searchHistoryList[position].term}")
         onQueryTextSubmit(searchHistoryList[position].term)
     }
 
@@ -198,6 +192,22 @@ class PhotoCollectionActivity : AppCompatActivity(),
             binding.searchHistoryRv.visibility = View.INVISIBLE
             binding.rvLabel.visibility = View.INVISIBLE
             binding.clearSearchHistoryBtn.visibility=View.INVISIBLE
+        }
+    }
+
+    private fun insertSearchTermHistory(searchTerm:String) {
+        if(SharedPrefManager.checkSearchHistoryMode()){
+            val newSearchData = SearchData(term = searchTerm, timestamp = Date().toFormatString())
+            //중복 제거
+            val filter =
+                this.searchHistoryList.filter { searchData -> searchData.term != searchTerm }
+            searchHistoryList = filter as ArrayList<SearchData>
+            searchHistoryList.add(newSearchData)
+
+            //pref 저장
+            SharedPrefManager.storeSearchHistoryList(searchHistoryList as MutableList<SearchData>)
+            searchViewAdapter.submitList(searchHistoryList)
+            this.searchViewAdapter.notifyDataSetChanged()
         }
     }
 }
