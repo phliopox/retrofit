@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.CompoundButton
@@ -17,9 +18,20 @@ import com.ian.coru1.databinding.PhotoActivityBinding
 import com.ian.coru1.model.Photo
 import com.ian.coru1.model.SearchData
 import com.ian.coru1.retrofit.RetrofitManager
+import com.ian.coru1.utils.Constants.TAG
 import com.ian.coru1.utils.SharedPrefManager
+import com.ian.coru1.utils.textChangesToFlow
 import com.ian.coru1.utils.toFormatString
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 class PhotoCollectionActivity : AppCompatActivity(),
     SearchView.OnQueryTextListener,
@@ -32,8 +44,10 @@ class PhotoCollectionActivity : AppCompatActivity(),
     private lateinit var mySearchView: SearchView
     private lateinit var mySearchViewEditText: EditText
     private lateinit var searchViewAdapter: SearchViewAdapter
-    private lateinit var photoGridAdapter : PhotoGridAdapter
-
+    private lateinit var photoGridAdapter: PhotoGridAdapter
+    private var myCoroutineJob : Job = Job()
+    private val myCoroutineContext : CoroutineContext
+    get() = Dispatchers.IO + myCoroutineContext
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -61,10 +75,16 @@ class PhotoCollectionActivity : AppCompatActivity(),
 
         //서치뷰 adapter
         searchHistoryRVSetting(searchHistoryList)
-
+        //최근 검색어 on/off 유지
+        binding.searchHistorySwitch.isChecked = SharedPrefManager.checkSearchHistoryMode()
+        //외부 검색어도 최근 검색어에 추가
+        searchTerm?.let {
+            insertSearchTermHistory(searchTerm)
+        }
         handleSearchViewUI()
     }
-    private fun searchHistoryRVSetting(searchHistoryList : ArrayList<SearchData>){
+
+    private fun searchHistoryRVSetting(searchHistoryList: ArrayList<SearchData>) {
         searchViewAdapter = SearchViewAdapter(this)
         binding.searchHistoryRv.apply {
             scrollToPosition(searchViewAdapter.itemCount - 1) //최신거 맨위
@@ -97,7 +117,25 @@ class PhotoCollectionActivity : AppCompatActivity(),
             }
             this.setOnQueryTextListener(this@PhotoCollectionActivity)
             mySearchViewEditText = this.findViewById(androidx.appcompat.R.id.search_src_text)
+
+
+            GlobalScope.launch(myCoroutineJob) {
+                //edittext 가 변경될 때 flow로 변경
+                val editTextFlow = mySearchViewEditText.textChangesToFlow()
+                editTextFlow
+                    .debounce(1000)
+                    .filter {
+                        it?.length!! > 0
+                    }
+                    .onEach {
+                        Log.d(TAG, "PhotoCollectionActivity - onCreateOptionsMenu: $it");
+
+                    }.launchIn(this)
+            }
         }
+
+
+
         this.mySearchViewEditText.apply {
             this.filters = arrayOf(InputFilter.LengthFilter(12))
             this.setTextColor(Color.WHITE)
@@ -140,7 +178,7 @@ class PhotoCollectionActivity : AppCompatActivity(),
             binding.searchHistorySwitch -> {
                 if (isChecked) {
                     SharedPrefManager.setSearchHistoryMode(true)
-                }else{
+                } else {
                     SharedPrefManager.setSearchHistoryMode(false)
                 }
             }
@@ -171,11 +209,11 @@ class PhotoCollectionActivity : AppCompatActivity(),
     }
 
     //api 호출
-    private fun searchPhotoApiCall(query : String){
+    private fun searchPhotoApiCall(query: String) {
         RetrofitManager.instance.searchPhotos(searchTerm = query, completion = {
-            if(it.isEmpty()){
-             Toast.makeText(this,"$query 에 대한 검색 결과가 없습니다.",Toast.LENGTH_SHORT).show()
-            }else {
+            if (it.isEmpty()) {
+                Toast.makeText(this, "$query 에 대한 검색 결과가 없습니다.", Toast.LENGTH_SHORT).show()
+            } else {
                 photoList.clear()
                 photoList = it
                 photoGridAdapter.submitList(photoList)
@@ -183,20 +221,21 @@ class PhotoCollectionActivity : AppCompatActivity(),
             }
         })
     }
-    private fun handleSearchViewUI(){
+
+    private fun handleSearchViewUI() {
         if (searchHistoryList.size > 0) {
             binding.searchHistoryRv.visibility = View.VISIBLE
-            binding.rvLabel.visibility =View.VISIBLE
-            binding.clearSearchHistoryBtn.visibility=View.VISIBLE
-        }else{
+            binding.rvLabel.visibility = View.VISIBLE
+            binding.clearSearchHistoryBtn.visibility = View.VISIBLE
+        } else {
             binding.searchHistoryRv.visibility = View.INVISIBLE
             binding.rvLabel.visibility = View.INVISIBLE
-            binding.clearSearchHistoryBtn.visibility=View.INVISIBLE
+            binding.clearSearchHistoryBtn.visibility = View.INVISIBLE
         }
     }
 
-    private fun insertSearchTermHistory(searchTerm:String) {
-        if(SharedPrefManager.checkSearchHistoryMode()){
+    private fun insertSearchTermHistory(searchTerm: String) {
+        if (SharedPrefManager.checkSearchHistoryMode()) {
             val newSearchData = SearchData(term = searchTerm, timestamp = Date().toFormatString())
             //중복 제거
             val filter =
@@ -210,9 +249,15 @@ class PhotoCollectionActivity : AppCompatActivity(),
             this.searchViewAdapter.notifyDataSetChanged()
         }
     }
-}
-interface SearchViewClickListener{
-    fun onSearchItemDeleteClicked(position : Int)
 
-    fun onSearchItemClicked(position : Int)
+    override fun onDestroy() {
+        super.onDestroy()
+        myCoroutineJob.cancel()
+    }
+}
+
+interface SearchViewClickListener {
+    fun onSearchItemDeleteClicked(position: Int)
+
+    fun onSearchItemClicked(position: Int)
 }

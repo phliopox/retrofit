@@ -1,11 +1,9 @@
 package com.ian.coru1.utils
 
 import android.content.Context
-import android.util.Log
 import com.google.gson.Gson
 import com.ian.coru1.App
 import com.ian.coru1.model.SearchData
-import com.ian.coru1.utils.Constants.TAG
 
 //싱글톤을 위해 object 로 !
 object SharedPrefManager {
@@ -26,11 +24,9 @@ object SharedPrefManager {
     }
     //검색 목록 저장
     fun storeSearchHistoryList(searchHistoryList: MutableList<SearchData>) {
-        Log.d(TAG, "storeSearchHistoryList: called")
 
         //매개변수로 들어온 배열을 문자열로 변환
         val searchHistoryListString: String = Gson().toJson(searchHistoryList)
-        Log.d(TAG, "SharedPrefManager - storeSearchHistoryList: $searchHistoryListString");
 
         val shared = App.instance.getSharedPreferences(SHARED_SEARCH_HISTORY, Context.MODE_PRIVATE)
         val editor = shared.edit()
