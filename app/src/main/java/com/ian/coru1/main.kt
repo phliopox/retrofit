@@ -5,8 +5,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-fun main1() {
-
+fun main() {
+ // 다른 코드 수행을 막음 runblocking ,
+    //launch 는 새로운 코루틴을 생성하고, 다른 코드의 수행을 기다리지 않음(runblocking 내부에서 사용시에는 runblocking 코드를 기다림.)
     runBlocking {
     GlobalScope.launch {
         delay(1000)
@@ -43,7 +44,7 @@ suspend fun myWorld(){
     println("world!!")
 }
 
-fun main() = runBlocking {
+fun main123() = runBlocking {
     launch {
         repeat(5) {i->
             println("라라라 $i")
