@@ -1,9 +1,7 @@
 package com.ian.coru1
 
-import com.ian.coru1.model.Photo
 import kotlinx.coroutines.*
 import kotlin.random.Random
-import kotlin.system.measureTimeMillis
 
 fun main11()= runBlocking {
     val job= launch {
@@ -104,6 +102,7 @@ fun main () = runBlocking{
     } ?:false
     println(result)
 }*/
+/*
 
 suspend fun getRandom1(): Int {
     delay(1000L)
@@ -129,4 +128,52 @@ fun main() = runBlocking {
         println("${value3.await()}")
     }
     println(elapsedTime)
+}*/
+
+interface a{
+    fun a ()
+}
+suspend fun printRandom() {
+    println(Random.nextInt(0, 500))
+
+}
+
+fun main() {
+    val scope = CoroutineScope(Dispatchers.Default)
+    scope.launch(Dispatchers.IO) {
+        printRandom()
+
+    }
+
+    Thread.sleep(1000L)
+}
+
+internal open class parent {
+    constructor(){
+        println("parent")
+    }
+
+    open fun compute(num: Int): Int {
+        println("parent compute")
+        return if (num <= 1) num else compute(num - 1) + compute(num - 2)
+    }
+}
+
+internal class Child : parent() {
+
+    override fun compute(num: Int): Int {
+        println("chlid compute")
+        return if (num <= 1) num else compute(num - 1) + compute(num - 3)
+    }
+}
+
+internal object good {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val obj: parent = Child()
+        print(obj.compute(4))
+        var a=1
+        print("test ${a++}")
+        println(a.toString())
+    }
 }
