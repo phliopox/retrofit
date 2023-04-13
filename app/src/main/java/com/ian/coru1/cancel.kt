@@ -175,7 +175,6 @@ internal object good {
         var a=1
         print("test ${a++}")
         println(a.toString())
-        print("% text ${2%1}")
 
     }
 }
