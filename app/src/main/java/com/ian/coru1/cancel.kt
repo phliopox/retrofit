@@ -170,11 +170,19 @@ internal class Child : parent() {
 internal object good {
     @JvmStatic
     fun main(args: Array<String>) {
-        val obj: parent = Child()
+      /*  val obj: parent = Child()
         print(obj.compute(4))
         var a=1
         print("test ${a++}")
-        println(a.toString())
+        println(a.toString())*/
+        /*println(3%1)
+        println(1%3)
+        val arr = arrayOf(1, 2, 3, 4, 5)
+        var i=0
+        arr[i++] = 5
+        println(arr.forEach { i->print(arr[i-1]) })
+        println(arr[i])*/
 
+        println(0%3)
     }
 }
